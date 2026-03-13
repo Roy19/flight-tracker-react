@@ -49,17 +49,25 @@ export function Map() {
       id: 'flights-dots',
       data: flights,
       pickable: true,
-      onClick: ({ object }) => setSelectedFlight(object),
+      onClick: ({ object }) => !object?.expired && setSelectedFlight(object),
       getPosition: (d: any) => [d.longitude || 0, d.latitude || 0],
-      getFillColor: (d: any) => d.icao24 === selectedFlight?.icao24 ? [0, 255, 136, 255] : [0, 210, 255, 150],
-      getRadius: viewport.zoom > 6 ? 0 : 4,
-      radiusUnits: 'pixels'
+      getFillColor: (d: any) => {
+        if (d.expired) return [0, 0, 0, 0];
+        return d.icao24 === selectedFlight?.icao24 ? [0, 255, 136, 255] : [0, 210, 255, 150];
+      },
+      getRadius: (d: any) => d.expired ? 0 : (viewport.zoom > 6 ? 0 : 4),
+      radiusUnits: 'pixels',
+      transitions: {
+        getPosition: 500,
+        getFillColor: 500,
+        getRadius: 500
+      }
     }),
     new IconLayer({
       id: 'flights-icons',
       data: flights,
       pickable: true,
-      onClick: ({ object }) => setSelectedFlight(object),
+      onClick: ({ object }) => !object?.expired && setSelectedFlight(object),
       iconAtlas: AIRPLANE_SVG,
       iconMapping: {
         marker: { x: 0, y: 0, width: 24, height: 24, mask: true }
@@ -67,11 +75,17 @@ export function Map() {
       getIcon: () => 'marker',
       sizeScale: viewport.zoom > 6 ? 2 : 0, // Only show icons when zoomed in
       getPosition: (d: any) => [d.longitude || 0, d.latitude || 0],
-      getSize: 16,
-      getColor: (d: any) => d.icao24 === selectedFlight?.icao24 ? [0, 255, 136] : [0, 210, 255],
+      getSize: (d: any) => d.expired ? 0 : 16,
+      getColor: (d: any) => {
+        if (d.expired) return [0, 0, 0, 0];
+        return d.icao24 === selectedFlight?.icao24 ? [0, 255, 136, 255] : [0, 210, 255, 255];
+      },
       getAngle: (d: any) => 360 - (d.trueTrack || 0), // Rotate plane
       transitions: {
-        getPosition: 500
+        getPosition: 500,
+        getColor: 500,
+        getSize: 500,
+        getAngle: 500
       }
     }),
   ];

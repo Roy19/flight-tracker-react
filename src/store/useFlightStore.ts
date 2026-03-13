@@ -29,7 +29,41 @@ export const useFlightStore = create<FlightStore>((set) => ({
     zoom: 4,
   },
 
-  setFlights: (flights) => set({ flights }),
+  setFlights: (newFlights) => set((state) => {
+    const newFlightsMap = new Map(newFlights.map(f => [f.icao24, f]));
+    let updatedFlights = [];
+
+    // Retain existing flights that are in the new payload and update them
+    for (const existingFlight of state.flights) {
+      if (newFlightsMap.has(existingFlight.icao24)) {
+        updatedFlights.push({
+          ...existingFlight,
+          ...newFlightsMap.get(existingFlight.icao24)!,
+          expired: false
+        });
+        newFlightsMap.delete(existingFlight.icao24);
+      } else {
+        // Mark as expired to maintain index stability for DeckGL transitions
+        updatedFlights.push({
+          ...existingFlight,
+          expired: true
+        });
+      }
+    }
+
+    // Add entirely new flights
+    for (const newFlight of newFlightsMap.values()) {
+      updatedFlights.push({ ...newFlight, expired: false });
+    }
+
+    // Garbage collection to prevent memory issues.
+    // Triggers a rearrange once every ~5000 items, bounded length.
+    if (updatedFlights.length > 5000) {
+      updatedFlights = updatedFlights.filter((f: any) => !f.expired);
+    }
+
+    return { flights: updatedFlights };
+  }),
   setSelectedFlight: (flight) => set({ selectedFlight: flight }),
   setIsLoading: (isLoading) => set({ isLoading }),
   setViewport: (viewport) => set((state) => ({ viewport: { ...state.viewport, ...viewport } })),
