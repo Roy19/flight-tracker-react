@@ -5,6 +5,7 @@ const TOKEN_URL =
 
 // Module-level token cache (survives warm invocations)
 let cachedToken: string | null = null;
+let cachedExpiresIn = 0;
 let tokenExpiresAt = 0;
 
 export const getAccessToken = async (): Promise<string | null> => {
@@ -33,8 +34,9 @@ export const getAccessToken = async (): Promise<string | null> => {
 
   const data = await response.json();
   cachedToken = data.access_token;
+  cachedExpiresIn = data.expires_in as number;
   // Expire 1 minute before actual expiry to be safe
-  tokenExpiresAt = Date.now() + (data.expires_in - 60) * 1000;
+  tokenExpiresAt = Date.now() + (cachedExpiresIn - 60) * 1000;
   return cachedToken;
 };
 
@@ -51,7 +53,7 @@ const handler: Handler = async (_event: HandlerEvent, _context: HandlerContext) 
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ access_token: token }),
+      body: JSON.stringify({ access_token: token, expires_in: cachedExpiresIn }),
     };
   } catch (err) {
     console.error('opensky-token error:', err);

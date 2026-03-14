@@ -9,9 +9,9 @@ const getAccessToken = async () => {
   if (!token || !expiresAt || Date.now() > Date.parse(expiresAt)) {
     const response = await fetch(TOKEN_FUNCTION_URL);
     const data = await response.json();
-    console.log("token data", data);
     localStorage.setItem('opensky-token', data.access_token);
     localStorage.setItem('opensky-token-expires-at', (Date.now() + data.expires_in * 1000).toString());
+    return data.access_token;
   } else {
     return token;
   }
