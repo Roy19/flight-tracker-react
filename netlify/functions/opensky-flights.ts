@@ -1,10 +1,10 @@
 import type { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
-import { getAccessToken } from './opensky-token';
 
 const OPENSKY_URL = 'https://opensky-network.org/api/states/all';
 
 const handler: Handler = async (event: HandlerEvent, _context: HandlerContext) => {
   const { lamin, lomin, lamax, lomax } = event.queryStringParameters ?? {};
+  const headers = event.headers;
 
   if (lamin == null || lomin == null || lamax == null || lomax == null) {
     return {
@@ -15,10 +15,9 @@ const handler: Handler = async (event: HandlerEvent, _context: HandlerContext) =
 
   try {
     const url = `${OPENSKY_URL}?lamin=${lamin}&lomin=${lomin}&lamax=${lamax}&lomax=${lomax}`;
-    const token = await getAccessToken();
 
-    const fetchOptions: RequestInit = token
-      ? { headers: { Authorization: `Bearer ${token}` } }
+    const fetchOptions: RequestInit = headers
+      ? { headers: headers as HeadersInit }
       : {};
 
     const response = await fetch(url, fetchOptions);

@@ -1,6 +1,21 @@
 import type { Flight } from '../types';
 
 const FLIGHTS_FUNCTION_URL = '/.netlify/functions/opensky-flights';
+const TOKEN_FUNCTION_URL = '/.netlify/functions/opensky-token';
+
+const getAccessToken = async () => {
+  const token = localStorage.getItem('opensky-token');
+  const expiresAt = localStorage.getItem('opensky-token-expires-at');
+  if (!token || !expiresAt || Date.now() > Date.parse(expiresAt)) {
+    const response = await fetch(TOKEN_FUNCTION_URL);
+    const data = await response.json();
+    console.log("token data", data);
+    localStorage.setItem('opensky-token', data.access_token);
+    localStorage.setItem('opensky-token-expires-at', (Date.now() + data.expires_in * 1000).toString());
+  } else {
+    return token;
+  }
+}
 
 export const fetchFlights = async (
   lamin: number,
@@ -9,8 +24,14 @@ export const fetchFlights = async (
   lomax: number
 ): Promise<Flight[]> => {
   try {
+    const token = await getAccessToken();
+
     const url = `${FLIGHTS_FUNCTION_URL}?lamin=${lamin}&lomin=${lomin}&lamax=${lamax}&lomax=${lomax}`;
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     if (!response.ok) {
       if (response.status === 429) {
