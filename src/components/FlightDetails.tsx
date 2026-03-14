@@ -20,7 +20,7 @@ export function FlightDetails() {
   return (
     <div className="ui-layer">
       <div 
-        className="glass-panel interactive-panel"
+        className="glass-panel interactive-panel animate-slide-in-right"
         style={{
           position: 'absolute',
           top: '24px',
@@ -29,7 +29,7 @@ export function FlightDetails() {
           padding: '24px',
           display: 'flex',
           flexDirection: 'column',
-          gap: '20px'
+          gap: '24px'
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -55,7 +55,20 @@ export function FlightDetails() {
           </div>
           
           <button 
-            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+            className="interactive-hover"
+            style={{ 
+              background: 'rgba(255,255,255,0.05)', 
+              border: '1px solid var(--panel-border)', 
+              color: 'var(--text-main)', 
+              cursor: 'pointer',
+              width: '32px',
+              height: '32px',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '16px'
+            }}
             onClick={() => setSelectedFlight(null)}
           >
             ✕
@@ -63,39 +76,40 @@ export function FlightDetails() {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-          <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '12px', marginBottom: '4px' }}>
-              <Navigation size={14} /> Altitude
+          <div className="interactive-hover" style={{ background: 'rgba(255,255,255,0.03)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '12px', marginBottom: '8px' }}>
+              <Navigation size={14} color="var(--accent-blue)" /> Altitude
             </div>
-            <div style={{ fontSize: '18px', fontWeight: 500 }}>
+            <div style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-main)' }}>
               {getAltitudeString(selectedFlight.baroAltitude)}
             </div>
           </div>
           
-          <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '12px', marginBottom: '4px' }}>
-              <Gauge size={14} /> Speed
+          <div className="interactive-hover" style={{ background: 'rgba(255,255,255,0.03)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '12px', marginBottom: '8px' }}>
+              <Gauge size={14} color="var(--accent-green)" /> Speed
             </div>
-            <div style={{ fontSize: '18px', fontWeight: 500 }}>
+            <div style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-main)' }}>
               {getSpeedString(selectedFlight.velocity)}
             </div>
           </div>
           
-          <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '12px', marginBottom: '4px' }}>
-              <Share2 size={14} /> Heading
+          <div className="interactive-hover" style={{ background: 'rgba(255,255,255,0.03)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '12px', marginBottom: '8px' }}>
+              <Share2 size={14} color="var(--accent-purple)" /> Heading
             </div>
-            <div style={{ fontSize: '18px', fontWeight: 500 }}>
+            <div style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-main)' }}>
               {selectedFlight.trueTrack !== null ? `${Math.round(selectedFlight.trueTrack)}°` : 'N/A'}
             </div>
           </div>
 
-          <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '12px', marginBottom: '4px' }}>
-              <MapPin size={14} /> Lat/Lng
+          <div className="interactive-hover" style={{ background: 'rgba(255,255,255,0.03)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '12px', marginBottom: '8px' }}>
+              <MapPin size={14} color="#ffaa00" /> Lat/Lng
             </div>
-            <div style={{ fontSize: '14px', fontWeight: 500 }}>
-              {selectedFlight.latitude?.toFixed(2)}, {selectedFlight.longitude?.toFixed(2)}
+            <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-main)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <span>{selectedFlight.latitude?.toFixed(4)}</span>
+              <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>{selectedFlight.longitude?.toFixed(4)}</span>
             </div>
           </div>
         </div>

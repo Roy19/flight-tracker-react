@@ -7,7 +7,7 @@ export function Sidebar() {
   return (
     <div className="ui-layer">
       <div
-        className="glass-panel interactive-panel"
+        className="glass-panel interactive-panel animate-slide-in-left"
         style={{
           position: 'absolute',
           top: '24px',
@@ -42,19 +42,12 @@ export function Sidebar() {
           </div>
           {isLoading && (
             <div style={{ marginTop: '8px', color: 'var(--accent-blue)', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent-blue)', animation: 'pulse 1s infinite alternate' }} />
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent-blue)', animation: 'pulse-ring 1.5s infinite' }} />
               Updating via OpenSky...
             </div>
           )}
         </div>
       </div>
-
-      <style>{`
-        @keyframes pulse {
-          0% { transform: scale(0.8); opacity: 0.5; }
-          100% { transform: scale(1.2); opacity: 1; }
-        }
-      `}</style>
     </div>
   );
 }
