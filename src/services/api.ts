@@ -1,9 +1,7 @@
 import type { Flight } from '../types';
 
 const OPENSKY_URL = 'https://opensky-network.org/api/states/all';
-const OPENSKY_TOKEN_URL = import.meta.env.DEV 
-  ? '/opensky-auth/auth/realms/opensky-network/protocol/openid-connect/token'
-  : 'https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token';
+const OPENSKY_TOKEN_URL = '/opensky-auth/auth/realms/opensky-network/protocol/openid-connect/token';
 
 const clientId = import.meta.env.VITE_OPENSKY_CLIENTID;
 const clientSecret = import.meta.env.VITE_OPENSKY_CLIENTSECRET;
