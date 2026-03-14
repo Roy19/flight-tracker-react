@@ -16,9 +16,10 @@ const handler: Handler = async (event: HandlerEvent, _context: HandlerContext) =
   try {
     const url = `${OPENSKY_URL}?lamin=${lamin}&lomin=${lomin}&lamax=${lamax}&lomax=${lomax}`;
 
-    const fetchOptions: RequestInit = headers
-      ? { headers: headers as HeadersInit }
-      : {};
+    const fetchOptions: RequestInit = {
+      signal: AbortSignal.timeout(8000),
+      ...(headers ? { headers: headers as HeadersInit } : {}),
+    };
 
     const response = await fetch(url, fetchOptions);
 
@@ -39,6 +40,12 @@ const handler: Handler = async (event: HandlerEvent, _context: HandlerContext) =
     };
   } catch (err) {
     console.error('opensky-flights error:', err);
+    if (err instanceof DOMException && err.name === 'TimeoutError') {
+      return {
+        statusCode: 504,
+        body: JSON.stringify({ error: 'OpenSky API timed out' }),
+      };
+    }
     return { statusCode: 500, body: JSON.stringify({ error: 'Internal server error' }) };
   }
 };
