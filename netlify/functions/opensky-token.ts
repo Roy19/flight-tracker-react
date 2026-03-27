@@ -25,6 +25,7 @@ export const getAccessToken = async (): Promise<string | null> => {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: params.toString(),
+    signal: AbortSignal.timeout(8000),
   });
 
   if (!response.ok) {
@@ -57,6 +58,12 @@ const handler: Handler = async (_event: HandlerEvent, _context: HandlerContext) 
     };
   } catch (err) {
     console.error('opensky-token error:', err);
+    if (err instanceof DOMException && err.name === 'TimeoutError') {
+      return {
+        statusCode: 504,
+        body: JSON.stringify({ error: 'OpenSky auth server timed out' }),
+      };
+    }
     return { statusCode: 500, body: JSON.stringify({ error: 'Internal server error' }) };
   }
 };

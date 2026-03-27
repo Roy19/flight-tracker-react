@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Map as MapGL } from 'react-map-gl/maplibre';
 import DeckGL from '@deck.gl/react';
 import { IconLayer, ScatterplotLayer } from '@deck.gl/layers';
@@ -13,6 +13,13 @@ const AIRPLANE_SVG = `data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3
 
 export function Map() {
   const { flights, setFlights, selectedFlight, setSelectedFlight, viewport, setViewport, setIsLoading } = useFlightStore();
+  const [hoveredIcao, setHoveredIcao] = useState<string | null>(null);
+
+  const handleHover = (info: { object?: any }) => {
+    const { object } = info;
+    const icao = (!object || object.expired) ? null : (object.icao24 ?? null);
+    setHoveredIcao(prev => (prev === icao ? prev : icao));
+  };
   
   // Re-fetch when panning
   useEffect(() => {
@@ -50,17 +57,28 @@ export function Map() {
       data: flights,
       pickable: true,
       onClick: ({ object }) => !object?.expired && setSelectedFlight(object),
+      onHover: handleHover,
       getPosition: (d: any) => [d.longitude || 0, d.latitude || 0],
       getFillColor: (d: any) => {
         if (d.expired) return [0, 0, 0, 0];
-        return d.icao24 === selectedFlight?.icao24 ? [0, 255, 136, 255] : [0, 210, 255, 150];
+        if (d.icao24 === selectedFlight?.icao24) return [0, 255, 136, 255];
+        if (d.icao24 === hoveredIcao) return [255, 255, 255, 200];
+        return [0, 210, 255, 150];
       },
-      getRadius: (d: any) => d.expired ? 0 : (viewport.zoom > 6 ? 0 : 4),
+      getRadius: (d: any) => {
+        if (d.expired || viewport.zoom > 6) return 0;
+        if (d.icao24 === hoveredIcao && d.icao24 !== selectedFlight?.icao24) return 6;
+        return 4;
+      },
       radiusUnits: 'pixels',
+      updateTriggers: {
+        getFillColor: [selectedFlight?.icao24, hoveredIcao],
+        getRadius: [hoveredIcao, selectedFlight?.icao24, viewport.zoom],
+      },
       transitions: {
         getPosition: 500,
-        getFillColor: 500,
-        getRadius: 500
+        getFillColor: 200,
+        getRadius: 200
       }
     }),
     new IconLayer({
@@ -68,6 +86,7 @@ export function Map() {
       data: flights,
       pickable: true,
       onClick: ({ object }) => !object?.expired && setSelectedFlight(object),
+      onHover: handleHover,
       iconAtlas: AIRPLANE_SVG,
       iconMapping: {
         marker: { x: 0, y: 0, width: 24, height: 24, mask: true }
@@ -78,12 +97,17 @@ export function Map() {
       getSize: (d: any) => d.expired ? 0 : 16,
       getColor: (d: any) => {
         if (d.expired) return [0, 0, 0, 0];
-        return d.icao24 === selectedFlight?.icao24 ? [0, 255, 136, 255] : [0, 210, 255, 255];
+        if (d.icao24 === selectedFlight?.icao24) return [0, 255, 136, 255];
+        if (d.icao24 === hoveredIcao) return [255, 255, 255, 255];
+        return [0, 210, 255, 255];
       },
       getAngle: (d: any) => 360 - (d.trueTrack || 0), // Rotate plane
+      updateTriggers: {
+        getColor: [selectedFlight?.icao24, hoveredIcao],
+      },
       transitions: {
         getPosition: 500,
-        getColor: 500,
+        getColor: 200,
         getSize: 500,
         getAngle: 500
       }
@@ -97,6 +121,9 @@ export function Map() {
         onViewStateChange={({ viewState }) => setViewport(viewState as any)}
         controller={true}
         layers={layers}
+        getCursor={({ isDragging, isHovering }) =>
+          isDragging ? 'grabbing' : isHovering ? 'pointer' : 'grab'
+        }
       >
         <MapGL mapStyle={MAP_STYLE} reuseMaps />
       </DeckGL>
